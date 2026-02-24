@@ -13,7 +13,6 @@ class Lab(models.Model):
         ("medium", "Medium"),
         ("hard", "Hard"),
     ])
-    order = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.title

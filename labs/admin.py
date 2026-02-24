@@ -13,7 +13,7 @@ class LabSectionInline(admin.TabularInline):
 
 @admin.register(Lab)
 class LabAdmin(admin.ModelAdmin):
-    list_display = ("title", "module", "difficulty", "order")
+    list_display = ("title", "module", "difficulty")
     list_filter = ("difficulty", "module")
     search_fields = ("title",)
     inlines = [LabSectionInline]

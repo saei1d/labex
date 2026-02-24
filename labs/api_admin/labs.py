@@ -1,7 +1,7 @@
 # labs/views.py
 from rest_framework.viewsets import ModelViewSet
-from ..models import Lab, LabSection
-from ..serializers import LabSerializer, LabSectionSerializer
+from ..models import Lab, LabSection, LabSession
+from ..serializers import LabSerializer, LabSectionSerializer, LabSessionSerializer
 
 
 class LabViewSet(ModelViewSet):
@@ -12,3 +12,4 @@ class LabViewSet(ModelViewSet):
 class LabSectionViewSet(ModelViewSet):
     queryset = LabSection.objects.all()
     serializer_class = LabSectionSerializer
+
