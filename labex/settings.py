@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     
-    
     'accounts',
     'courses',
     'labs',
@@ -148,3 +147,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+# Docker Configuration
+DOCKER_SOCKET = '/var/run/docker.sock'
+LABEX_CONTAINER_TIMEOUT = 7200  # 2 hours in seconds
+LABEX_MAX_CONTAINERS_PER_USER = 3
