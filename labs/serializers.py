@@ -1,12 +1,27 @@
-# labs/serializers.py
 from rest_framework import serializers
-from .models import Lab, LabSection, LabSession
+from .models import Lab, LabSection, LabSession, LabTask, TaskAttempt, TaskValidationRule
 
 
 class LabSessionSerializer(serializers.ModelSerializer):
+    code_server_url = serializers.SerializerMethodField()
+
     class Meta:
         model = LabSession
-        fields = ["id", "lab", "container_id", "status", "started_at"]
+        fields = [
+            "id",
+            "lab",
+            "container_id",
+            "status",
+            "port",
+            "code_server_url",
+            "started_at",
+            "expires_at",
+        ]
+
+    def get_code_server_url(self, obj):
+        if not obj.port:
+            return None
+        return f"http://localhost:{obj.port}"
 
 
 class LabSectionSerializer(serializers.ModelSerializer):
@@ -15,9 +30,31 @@ class LabSectionSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class TaskValidationRuleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskValidationRule
+        fields = "__all__"
+
+
+class LabTaskSerializer(serializers.ModelSerializer):
+    validation_rules = TaskValidationRuleSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = LabTask
+        fields = "__all__"
+
+
 class LabSerializer(serializers.ModelSerializer):
     sections = LabSectionSerializer(many=True, read_only=True)
+    tasks = LabTaskSerializer(many=True, read_only=True)
 
     class Meta:
         model = Lab
         fields = "__all__"
+
+
+class TaskAttemptSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskAttempt
+        fields = "__all__"
+        read_only_fields = ["attempt_no", "status", "score", "feedback"]
