@@ -3,7 +3,7 @@ from django.contrib import admin
 # Register your models here.
 # labs/admin.py
 from django.contrib import admin
-from .models import Lab, LabSection, LabSession
+from .models import Lab, LabSection, LabSession, LabTask
 
 
 class LabSectionInline(admin.TabularInline):
@@ -29,3 +29,9 @@ class LabSectionAdmin(admin.ModelAdmin):
 class LabSessionAdmin(admin.ModelAdmin):
     list_display = ("user", "lab", "status", "started_at")
     list_filter = ("status",)
+
+
+@admin.register(LabTask)
+class LabTaskAdmin(admin.ModelAdmin):
+    list_display = ("title", "lab", "section", "prompt_md", "order")
+    ordering = ("lab", "section", "order")

@@ -174,3 +174,51 @@ python manage.py cleanup_expired_sessions
 - در MVP اگر Docker daemon در دسترس نباشد، `start_lab` با 503 برمی‌گردد.
 - برای تست unit از `mock` روی runtime/grader استفاده شده تا وابسته به docker نباشد.
 - پاسخ validator sanitize می‌شود تا جزئیات حساس فاش نشود.
+
+---
+
+## Docker Image Templates (`docker_images/`)
+
+`Lab.docker_image` now stores an image key (template key), not a full Docker image ref.
+
+Example keys:
+- `python-dockerfile`
+- `node-dockerfile`
+
+The key is resolved through `LAB_DOCKER_IMAGE_MAP` in `labex/settings.py`:
+
+```python
+LAB_DOCKER_IMAGE_MAP = {
+    "python-dockerfile": "ghcr.io/your-org/lab-python:1.0.0",
+    "node-dockerfile": "ghcr.io/your-org/lab-node:1.0.0",
+}
+```
+
+You can override this map with env var `LAB_DOCKER_IMAGE_MAP_JSON` (JSON object).
+
+### Manual/CI build workflow
+
+Build Python lab image:
+
+```bash
+docker build -t ghcr.io/your-org/lab-python:1.0.0 -f docker_images/python-dockerfile/Dockerfile .
+```
+
+Build Node lab image:
+
+```bash
+docker build -t ghcr.io/your-org/lab-node:1.0.0 -f docker_images/node-dockerfile/Dockerfile .
+```
+
+Push (example):
+
+```bash
+docker push ghcr.io/your-org/lab-python:1.0.0
+docker push ghcr.io/your-org/lab-node:1.0.0
+```
+
+### Sync policy
+
+- Every key in `LAB_DOCKER_IMAGE_MAP` must map to an existing built image tag.
+- Keep keys stable (`python-dockerfile`) and bump image tags (`:1.0.1`) for updates.
+- `start_lab` does not build images; it only resolves key -> image and runs the container.

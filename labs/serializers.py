@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Lab, LabSection, LabSession, LabTask, TaskAttempt, TaskValidationRule
+from .services.image_resolver import UnknownLabImageKey, normalize_image_key, resolve_lab_image
 
 
 class LabSessionSerializer(serializers.ModelSerializer):
@@ -47,6 +48,14 @@ class LabTaskSerializer(serializers.ModelSerializer):
 class LabSerializer(serializers.ModelSerializer):
     sections = LabSectionSerializer(many=True, read_only=True)
     tasks = LabTaskSerializer(many=True, read_only=True)
+
+    def validate_docker_image(self, value):
+        normalized_key = normalize_image_key(value)
+        try:
+            resolve_lab_image(normalized_key)
+        except UnknownLabImageKey as exc:
+            raise serializers.ValidationError(str(exc))
+        return normalized_key
 
     class Meta:
         model = Lab

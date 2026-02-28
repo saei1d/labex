@@ -11,7 +11,7 @@ class CourseModuleInline(admin.TabularInline):
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
     list_display = ("title", "level", "is_published", "created_at")
-    list_filter = ("level", "is_published")
+    list_filter = ['level', 'status']  # به جای is_published از status استفاده کنید
     search_fields = ("title", "description")
     prepopulated_fields = {"slug": ("title",)}
     inlines = [CourseModuleInline]

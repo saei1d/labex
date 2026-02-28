@@ -17,3 +17,4 @@ ENV/
 env.bak/
 venv.bak/
 db.sqlite3
+.pytest_cache/

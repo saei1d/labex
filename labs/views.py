@@ -9,6 +9,7 @@ from labs.models import Lab, LabSection, LabTask, LabSession, TaskAttempt
 from labs.serializers import LabSerializer, LabSectionSerializer, LabTaskSerializer, LabSessionSerializer
 from labs.services.container_runtime import RuntimeErrorException, runtime
 from labs.services.grader import evaluate_task
+from labs.services.image_resolver import UnknownLabImageKey, resolve_lab_image
 from progress.models import UserTaskProgress
 
 
@@ -36,7 +37,12 @@ def start_lab(request, lab_id):
         return Response({"error": "Lab not found or not published"}, status=status.HTTP_404_NOT_FOUND)
 
     try:
-        runtime_container = runtime.create_session_container(image=lab.docker_image, session_key=f"{request.user.id}-{lab.id}")
+        resolved_image = resolve_lab_image(lab.docker_image)
+    except UnknownLabImageKey as exc:
+        return Response({"error": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        runtime_container = runtime.create_session_container(image=resolved_image, session_key=f"{request.user.id}-{lab.id}")
     except RuntimeErrorException as exc:
         return Response({"error": str(exc)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 

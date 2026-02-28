@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import json
 from pathlib import Path
 import os
 from datetime import timedelta
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     
     'rest_framework',
     'drf_yasg',
+    'corsheaders',
     
     
     'accounts',
@@ -51,6 +53,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # <-- این خط رو اضافه کن (بالا)
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -115,6 +118,19 @@ DATABASES = {
     }
 }
 
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    },
+    'USE_SESSION_AUTH': False,
+    'JSON_EDITOR': True,
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
@@ -148,3 +164,34 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # آدرس فرانت‌اند Next.js
+    "http://127.0.0.1:3000",  # آدرس جایگزین
+]
+
+# اگر نیاز به ارسال کوکی (مثل token) داری
+CORS_ALLOW_CREDENTIALS = True
+
+
+# Local development defaults (works with local docker build):
+LAB_DOCKER_IMAGE_MAP = {
+    "python-dockerfile": "labex/lab-python:1.0.0",
+    "node-dockerfile": "labex/lab-node:1.0.0",
+}
+
+# Production example (private/public registry):
+# LAB_DOCKER_IMAGE_MAP = {
+#     "python-dockerfile": "ghcr.io/your-org/lab-python:1.0.0",
+#     "node-dockerfile": "ghcr.io/your-org/lab-node:1.0.0",
+# }
+
+_lab_docker_image_map_json = os.getenv("LAB_DOCKER_IMAGE_MAP_JSON")
+if _lab_docker_image_map_json:
+    try:
+        _parsed_map = json.loads(_lab_docker_image_map_json)
+        if isinstance(_parsed_map, dict):
+            LAB_DOCKER_IMAGE_MAP = {str(k).strip().lower(): str(v).strip() for k, v in _parsed_map.items() if str(v).strip()}
+    except json.JSONDecodeError:
+        pass
